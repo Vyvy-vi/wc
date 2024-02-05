@@ -1,2 +1,7 @@
-- Handle multi-byte characters
-- 
+- Fix: Output based on flags
+- Fix: word counter (-w)
+- Feat: Handle multi-byte characters (-m)
+- Feat: Read from stdin 
+- Fix: Refactor code
+- Docs: create README
+- Feat?: Buffering Strategies, Multithreading, Efficiency Improvement
