@@ -4,6 +4,8 @@
 #include "fcntl.h"
 #include "unistd.h"
 #include "wctype.h"
+#include "wchar.h"
+#include "locale.h"
 
 struct Options {
   bool c;
@@ -72,21 +74,29 @@ void print_values(struct Data data, struct Options options, char* filename) {
 
 struct Data  extractData(int fd, struct Options options) {
   struct Data d = {0, 0, 0};
+  bool word_buffered = 0;
   char buf;
-  char prev = '\0';
   while (0 != read(fd, &buf, 1)) {
     if (buf == '\n') {
       d.lines++;
-      if (prev != ' ' && prev != '\n')
+      word_buffered = 0;
+    }
+    else if (isspace(buf)) {
+      if (word_buffered) {
         d.words++;
+        word_buffered = 0;
+      }
+    } else {
+      word_buffered = 1;
     }
-    // if (iswspace(buf)) {
-    if (buf == ' ' && prev != ' ') {
-      d.words++;
-    }
-    prev = buf;
+
     d.bytes++;
   }
+
+  if (word_buffered)
+    d.words++;
+
+
   return d;
 }
 
@@ -95,11 +105,11 @@ void processStdin(struct Options options) {
 }
 
 void processFiles(int argc, char* argv[], struct Options options) {
-  printf("%d %d\n", options.filename_index, argc);
   if (argc == 1 || options.filename_index == 0) return processStdin(options);
   
   struct Data total = {0, 0, 0};
 
+  int cnt = 0;
   for (int i = options.filename_index; i < argc; i++) {    
     int fd = open(argv[i], O_RDONLY);
     if (fd == -1) {
@@ -107,16 +117,18 @@ void processFiles(int argc, char* argv[], struct Options options) {
       continue;
     }
     struct Data d = extractData(fd, options);
+    cnt++;
     total.bytes += d.bytes;
     total.lines += d.lines;
     total.words += d.words;
 
     print_values(d, options, argv[i]);
   }
-  print_values(total, options, "total");
+  if (cnt > 1) print_values(total, options, "total");
 }
 
 int main(int argc, char* argv[]) {
+  setlocale(LC_ALL, "");
   struct Options options = parse_options(argc, argv);
   processFiles(argc, argv, options);
 
