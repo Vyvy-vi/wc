@@ -1,4 +1,3 @@
-- Fix: Output based on flags
 - Feat: Handle multi-byte characters (-m)
 - Feat: Read from stdin 
 - Fix: Refactor code

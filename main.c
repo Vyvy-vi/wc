@@ -69,7 +69,21 @@ struct Options parse_options(int argc, char* argv[]) {
 }
 
 void print_values(struct Data data, struct Options options, char* filename) {
-      printf("%8lld%8lld%8lld %s\n", data.lines, data.words, data.bytes, filename);
+  if (options.c && !options.w && !options.l)
+    printf("%8lld %s\n", data.bytes, filename);
+  else if (!options.c && options.w && !options.l)
+    printf("%8lld %s\n", data.words, filename);
+  else if (!options.c && !options.w && options.l)
+    printf("%8lld %s\n", data.lines, filename);
+  else if (options.c && options.w && options.l)    
+    printf("%8lld%8lld%8lld %s\n", data.lines, data.words, data.bytes, filename);
+  else if (!options.c)
+    printf("%8lld%8lld %s\n", data.lines, data.words, filename);
+  else if (!options.l)
+    printf("%8lld%8lld %s\n", data.words, data.bytes, filename);
+  else if (!options.w)
+    printf("%8lld%8lld %s\n", data.lines, data.bytes, filename);
+
 }
 
 struct Data  extractData(int fd, struct Options options) {
